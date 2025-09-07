@@ -1,0 +1,128 @@
+<odoo>
+    <!-- Список -->
+    <record id="view_arm_operator_task_list" model="ir.ui.view">
+        <field name="name">arm.operator.task.list</field>
+        <field name="model">arm.operator.task</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list string="Задания оператора" create="false" decoration-danger="status == 'defect'">
+                <field name="order_number"/>
+                <field name="order_name"/>
+                <field name="status"/>
+                <!-- Кнопки, отображаются одновременно, т.к. attrs/states в list view 18 не поддерживаются -->
+                <button name="action_take" string="Взять в работу" type="object" class="btn-primary"/>
+                <button name="action_done" string="ГОТОВО" type="object" class="btn-success"/>
+                <button name="action_defect" string="БРАК" type="object" class="btn-danger"/>
+                <button name="action_more" string="ПОДРОБНЕЕ" type="object" class="btn-secondary"/>
+                <button name="action_files" string="ФАЙЛЫ" type="object" class="btn-info"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Канбан -->
+    <record id="view_arm_operator_task_kanban" model="ir.ui.view">
+        <field name="name">arm.operator.task.kanban</field>
+        <field name="model">arm.operator.task</field>
+        <field name="arch" type="xml">
+            <kanban create="false">
+                <field name="order_number"/>
+                <field name="order_name"/>
+                <field name="status"/>
+                <field name="start_time"/>
+                <field name="end_time"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-att-class="['oe_kanban_global_click','o_kanban_card', record.status.value == 'defect' and 'o_kanban_red' or '']"
+                             t-att-style="'border:1px solid #ddd; padding:10px; width:256px; margin-bottom: 10px;'">
+                            <!-- Строка 1: Номер заказа -->
+                            <div>
+                                <strong>Номер заказа: </strong> <t t-esc="record.order_number.value"/>
+                            </div>
+                            <!-- Строка 2: Название заказа -->
+                            <div>
+                                <strong>Название заказа: </strong> <t t-esc="record.order_name.value"/>
+                            </div>
+                            <!-- Строка 3: Статус -->
+                            <div>
+                                <strong>Статус: </strong>
+                                <t t-if="record.status.value == 'ready'">Готово к работе</t>
+                                <t t-elif="record.status.value == 'in_progress'">В работе</t>
+                                <t t-elif="record.status.value == 'done'">Выполнено</t>
+                                <t t-elif="record.status.value == 'defect'">Брак</t>
+                                <t t-else="">
+                                    <t t-esc="record.status.value"/>
+                                </t>
+                            </div>
+                            <!-- Кнопки -->
+                            <!-- Первая строка кнопок (под статусом): Взять в работу или (Готово + Брак) -->
+                            <div style="margin-top:8px;">
+                                <t t-if="record.status.value == 'ready'">
+                                    <button name="action_take" type="object" class="btn btn-primary btn-sm w-100">
+                                        Взять в работу
+                                    </button>
+                                </t>
+                                <t t-elif="record.status.value == 'in_progress'">
+                                    <button name="action_done" type="object" class="btn btn-success btn-sm" style="width:48%; margin-right:4%;">
+                                        ГОТОВО
+                                    </button>
+                                    <button name="action_defect" type="object" class="btn btn-danger btn-sm" style="width:48%;">
+                                        БРАК
+                                    </button>
+                                </t>
+                            </div>
+                            <!-- Вторая строка кнопки "ПОДРОБНЕЕ" по центру -->
+                            <div style="margin-top:8px; text-align:center;">
+                                <button name="action_more" type="object" class="btn btn-secondary btn-sm">
+                                    ПОДРОБНЕЕ
+                                </button>
+                            </div>
+                            <!-- Третья строка кнопки "ФАЙЛЫ" по центру -->
+                            <div style="margin-top:8px; text-align:center;">
+                                <button name="action_files" type="object" class="btn btn-info btn-sm">
+                                    ФАЙЛЫ
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Форма -->
+    <record id="view_arm_operator_task_form" model="ir.ui.view">
+        <field name="name">arm.operator.task.form</field>
+        <field name="model">arm.operator.task</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Задание оператора" create="false">
+                <sheet>
+                    <group>
+                        <field name="order_number"/>
+                        <field name="order_name"/>
+                        <field name="status"/>
+                        <field name="start_time"/>
+                        <field name="end_time"/>
+                    </group>
+                    <group>
+                        <!-- Кнопки всегда отображаются (можно добавить attrs для скрытия по желанию) -->
+                        <button name="action_take" string="Взять в работу" type="object" class="oe_highlight"/>
+                        <button name="action_done" string="ГОТОВО" type="object" class="btn btn-success"/>
+                        <button name="action_defect" string="БРАК" type="object" class="btn btn-danger"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Действие -->
+    <record id="action_arm_operator_task" model="ir.actions.act_window">
+        <field name="name">АРМ Оператора</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">arm.operator.task</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+
+    <!-- Меню -->
+    <menuitem id="menu_arm_operator_root" name="АРМ Оператора" action="action_arm_operator_task" sequence="10"/>
+</odoo>

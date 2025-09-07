@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: odoo18_test
+      POSTGRES_USER: odoo18
+      POSTGRES_PASSWORD: odoo
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+      - ./ddatas/data.csv:/tmp/data.csv
+    restart: always
+
+  odoo:
+    image: odoo:18.0
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./odoo/addonscustom:/mnt/extra-addons
+      - ./conf/odoo.conf:/etc/odoo/odoo.conf
+    environment:
+      - HOST=db
+      - USER=odoo18
+      - PASSWORD=odoo
+    command: odoo -c /etc/odoo/odoo.conf -d odoo18_test -u arm_operator # -i base
+    restart: always
+
+volumes:
+  odoo-db-data:
+  odoo-web-data:
